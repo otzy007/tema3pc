@@ -19,6 +19,8 @@ public:
     std::string getInfo(std::string name);
     std::string getIPPort();
     std::string getShare();
+    void shareFile(std::string file);
+    bool unshareFile(std::string file);
 };
 
 typedef std::map <std::string, ClientInfo> Clients;

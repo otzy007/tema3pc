@@ -15,5 +15,15 @@ int main(int argc, char **argv) {
    sleep(2);
    cout << clients["gogu"].getInfo("gogu") << endl;
    cout << clients[argv[1]].getInfo(argv[1]) << endl;
+   cout << clients["gogu"].getShare();
+   clients[argv[1]].shareFile("haha");
+   clients[argv[1]].shareFile("lolz.txt");
+   clients[argv[1]].shareFile("cmon.mp3");
+   cout << clients[argv[1]].getShare() << endl;
+   clients[argv[1]].unshareFile("lolz.txt");
+   cout << clients[argv[1]].getShare() << endl;
+   clients[argv[1]].unshareFile("haha");
+   clients[argv[1]].unshareFile("cmon.mp3");
+   cout << clients[argv[1]].getShare() << endl;
    return 0;
 }

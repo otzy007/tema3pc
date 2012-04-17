@@ -1,5 +1,6 @@
 #include "ClientInfo.h"
 #include <sstream>
+#include <iostream>
 
 ClientInfo::ClientInfo()
 {
@@ -32,15 +33,34 @@ std::string ClientInfo::getIPPort()
 
 std::string ClientInfo::getShare()
 {
-   std::string shareList;
+   /* returneaza fisierele de la share */
    if ( share.empty() )
       return "No shared files\n";
-   shareList = std::string(share[0]);
-   shareList + ", ";
+   
+   std::string shareList = std::string(share[0]);
    for (unsigned int i = 1; i < share.size(); i++) {
-      shareList + share[i] + ", ";
+      shareList.append(", ").append(share[i]);
+//       std::cout << share[i] << std::endl;
    }
    return shareList;
+}
+
+void ClientInfo::shareFile(std::string file)
+{
+   /* adaugare fisier la lista de share */
+   share.push_back(file);
+}
+
+bool ClientInfo::unshareFile(std::string file)
+{
+   /* elimina un fisier din lista de share */
+   for (unsigned int i = 0; i < share.size(); i++) {
+      if (share[i] == file) {
+	 share.erase(share.begin() + i);
+	 return true;
+      }
+   }
+   return false;
 }
 
 
