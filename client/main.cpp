@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <fcntl.h>
 
 #include <vector>
 
@@ -81,7 +82,7 @@ int main(int argc, char **argv) {
 		     close(sockfd);
 		     return 0;
 		  }
-		  if (command == "listclients") {
+		  if (command == "listclients") { // listare clienti
 		     buffer[0] = 2;
 		     strcpy(buffer + 1, "listclients");
 		  } else if (command.find(" ")) {
@@ -89,12 +90,27 @@ int main(int argc, char **argv) {
 		     vector <std::string> substr;
 		     boost::split(substr, command, boost::is_any_of(" "));
 		     
-		     if (substr[0] == "infoclient") {
+		     if (substr[0] == "infoclient") { // informatii despre client
 			buffer[0] = 3;
 			strcpy(buffer + 1, substr[1].c_str());
 		     } else {
 			if (substr[0] == "getshare") {
+			   /* ia shareul unui client */
 			   buffer[0] = 7;
+			   strcpy(buffer + 1, substr[1].c_str());
+			} else if (substr[0] == "sharefile") {
+			   /* da la share un fisier */
+			   int fd;
+			   fd = open(substr[1].c_str(), O_RDONLY);
+			   if (fd < 0)
+			      cout << "File " << substr[1] << " does not exists\n";
+			   else {
+			      buffer[0] = 5;
+			      strcpy(buffer + 1, substr[1].c_str());
+			   }
+			} else if(substr[0] == "unsharefile") {
+			   /* scoate de la share */
+			   buffer[0] = 6;
 			   strcpy(buffer + 1, substr[1].c_str());
 			}
 		     }
