@@ -30,5 +30,19 @@ std::string ClientInfo::getIPPort()
    return ip + ":" + listenPort;
 }
 
+std::string ClientInfo::getShare()
+{
+   std::string shareList;
+   if ( share.empty() )
+      return "No shared files\n";
+   shareList = std::string(share[0]);
+   shareList + ", ";
+   for (unsigned int i = 1; i < share.size(); i++) {
+      shareList + share[i] + ", ";
+   }
+   return shareList;
+}
+
+
 
 

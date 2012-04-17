@@ -18,6 +18,7 @@ public:
     ClientInfo();
     std::string getInfo(std::string name);
     std::string getIPPort();
+    std::string getShare();
 };
 
 typedef std::map <std::string, ClientInfo> Clients;

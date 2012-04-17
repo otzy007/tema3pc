@@ -54,8 +54,11 @@ int main(int argc, char **argv) {
    
    while(1) {
       fd_set tmp_fds = read_fds;
+
       if (select(fdmax + 1, &tmp_fds, NULL, NULL, NULL) == -1)
 	 cout << "ERROR in select\n";
+      string command;
+//       cin >> command;
       for (int i = 0; i <= fdmax; i++) {
 	 if (FD_ISSET(i, &tmp_fds)) {
 	    if (i == sockfd) {
@@ -73,7 +76,23 @@ int main(int argc, char **argv) {
 	       }
 	    } else {
 	       if (i == STDIN_FILENO) {
-		  
+		  cin >> command;
+		  if (command == "quit")
+		     return 0; // opreste serverul la primirea comenzii quit
+		  if (command == "status") {
+		     if (clients.empty())
+			cout << "No clients\n";
+		     else {
+			map <std::string, ClientInfo> :: iterator it;
+			cout << "Client\tIP:Port\t\tShared files\n";
+			for (it = clients.begin(); it != clients.end(); it++) {
+			   cout << (*it).first << "\t" << (*it).second.getIPPort() <<
+			      "\t" << (*it).second.getShare()/* << endl*/;
+			}
+		     }
+		  } else {
+		     cout << "Available commands: status, quit\n";
+		  }
 	       } else {
 		  int n;
 		  bzero(buffer, BUFFLEN);
