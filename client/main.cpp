@@ -75,13 +75,13 @@ int main(int argc, char **argv) {
 	    if (FD_ISSET(i, &tmp_fds)) {
 	       if (i == STDIN_FILENO) {
 		  string command;
+		  bzero(buffer, BUFFLEN);
 		  getline(cin, command);
 		  if (command == "quit") {
 		     close(sockfd);
 		     return 0;
 		  }
 		  if (command == "listclients") {
-		     bzero(buffer, BUFFLEN);
 		     buffer[0] = 2;
 		     strcpy(buffer + 1, "listclients");
 		  } else if (command.find(" ")) {
@@ -90,9 +90,13 @@ int main(int argc, char **argv) {
 		     boost::split(substr, command, boost::is_any_of(" "));
 		     
 		     if (substr[0] == "infoclient") {
-			bzero(buffer, BUFFLEN);
 			buffer[0] = 3;
 			strcpy(buffer + 1, substr[1].c_str());
+		     } else {
+			if (substr[0] == "getshare") {
+			   buffer[0] = 7;
+			   strcpy(buffer + 1, substr[1].c_str());
+			}
 		     }
 		  }
 		  if (send(sockfd, buffer, sizeof(buffer), 0) < 0)
