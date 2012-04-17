@@ -19,13 +19,16 @@ int main(int argc, char **argv) {
       return 0;
    }
    
+   // map folosit pentru stocarea informatiilor despre clienti
+   Clients clients;
+   
    int port = atoi(argv[1]);
    char buffer[BUFFLEN];
    int sockfd;
    int fdmax;
    
    struct sockaddr_in serv_addr;
-   vector <struct sockaddr_in> cli_addr;
+   map <int, struct sockaddr_in> cli_addr;
    int cli_no; // numarul de clienti
    
    fd_set read_fds;
@@ -66,20 +69,39 @@ int main(int argc, char **argv) {
 		  FD_SET(newsockfd, &read_fds);
 		  if (newsockfd > fdmax)
 		     fdmax = newsockfd;
-		  cli_addr.push_back(tmp_sockaddr);
+		  cli_addr[newsockfd] = tmp_sockaddr;
 	       }
 	    } else {
-	       int n;
-	       bzero(buffer, BUFFLEN);
-	       if ((n = recv(i, buffer, sizeof(buffer), 0)) <= 0) {
-		  if (n == 0) 
-		     cout << "connection closed\n";
-		  else
-		     cout << "ERROR in recv\n";
-		  close(i);
-		  FD_CLR(i, &read_fds);
+	       if (i == STDIN_FILENO) {
+		  
 	       } else {
-		  cout << "message recieved: " << buffer << endl;
+		  int n;
+		  bzero(buffer, BUFFLEN);
+		  if ((n = recv(i, buffer, sizeof(buffer), 0)) <= 0) {
+		     if (n == 0) 
+			cout << "connection closed\n";
+		     else
+			cout << "ERROR in recv\n";
+		     close(i);
+		     FD_CLR(i, &read_fds);
+		  } else {
+		     cout << "message recieved: " << buffer << endl;
+		     switch (buffer[0]) {
+			case 1: 
+			{
+			   if (clients.find(buffer + 1) != clients.end()) {
+			      bzero(buffer, BUFFLEN);
+			      buffer[0] = 100;
+			      send(i, buffer, strlen(buffer), 0);
+			   } else {
+			      clients[buffer + 1] = ClientInfo(inet_ntoa(cli_addr[i].sin_addr), "22");
+			      buffer[0] = 200;
+			      cout << clients[buffer + 1].getIPPort();
+			      send(i, buffer, strlen(buffer), 0);
+			   }
+			} break;
+		     }
+		  }
 	       }
 	    }
 	 }
