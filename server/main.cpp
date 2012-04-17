@@ -154,7 +154,18 @@ int main(int argc, char **argv) {
 			   else
 			      strcpy(buffer + 1, "No client with such name");
 			   send(i, buffer, strlen(buffer), 0);
-			}
+			} break;
+			case 7:
+			{
+			   string client(buffer + 1);
+			   bzero(buffer, BUFFLEN);
+			   buffer[0] = 20;
+			   if (clients.find(client) != clients.end())
+			      strcpy(buffer + 1, clients[client].getShare().c_str());
+			   else
+			      strcpy(buffer + 1, "No client with such name");
+			   send(i, buffer, strlen(buffer), 0);
+			} break;
 		     }
 		  }
 	       }

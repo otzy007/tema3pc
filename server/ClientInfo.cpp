@@ -36,7 +36,7 @@ std::string ClientInfo::getShare()
 {
    /* returneaza fisierele de la share */
    if ( share.empty() )
-      return "No shared files\n";
+      return "No shared files";
    
    std::string shareList = std::string(share[0]);
    for (unsigned int i = 1; i < share.size(); i++) {

@@ -9,8 +9,16 @@ Comenzi:
 1 - client_name
 2 - listclients
 3 - clientinfo
+4 - message
+5 - sharefile
+6 - unsharefile
+7 - getshare
+8 - getfile
 
+Raspunsuri:
 Erori:
 100 - nume client existent
 
 OK: 20
+
+30 - mesaj
