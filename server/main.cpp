@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
 			      buffer[0] = 100;
 			   } else {
 			      clients[buffer + 1] = ClientInfo(i, inet_ntoa(cli_addr[i].sin_addr), "22");
-			      cout << clients[buffer + 1].getIPPort();
+// 			      cout << clients[buffer + 1].getIPPort();
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 20;
 			   }
@@ -142,6 +142,17 @@ int main(int argc, char **argv) {
 			   buffer[0] = 20;
 			   strcpy(buffer + 1, clientsList.c_str());
 			   buffer[strlen(buffer) - 2] = '\0';
+			   send(i, buffer, strlen(buffer), 0);
+			} break;
+			case 3:
+			{  
+			   string client(buffer + 1);
+			   bzero(buffer, BUFFLEN);
+			   buffer[0] = 20;
+			   if (clients.find(client) != clients.end())
+			      strcpy(buffer + 1, clients[client].getInfo(client).c_str());
+			   else
+			      strcpy(buffer + 1, "No client with such name");
 			   send(i, buffer, strlen(buffer), 0);
 			}
 		     }

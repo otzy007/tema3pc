@@ -8,6 +8,7 @@ Message Type:
 Comenzi:
 1 - client_name
 2 - listclients
+3 - clientinfo
 
 Erori:
 100 - nume client existent

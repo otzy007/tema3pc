@@ -23,7 +23,7 @@ std::string ClientInfo::getInfo(std::string name)
    double elapsedTime = difftime(time(NULL), connectTime);
    os << elapsedTime;
    
-   return info + ": port: " + listenPort + " time elapsed: " + os.str();
+   return info + ": port: " + listenPort + " time elapsed: " + os.str() + " seconds";
 }
 
 std::string ClientInfo::getIPPort()
