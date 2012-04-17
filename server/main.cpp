@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <string.h>
+#include "ClientInfo.h"
 
 #define MAX_CLIENTS 5
 #define BUFFLEN 256
@@ -66,11 +68,24 @@ int main(int argc, char **argv) {
 		     fdmax = newsockfd;
 		  cli_addr.push_back(tmp_sockaddr);
 	       }
+	    } else {
+	       int n;
+	       bzero(buffer, BUFFLEN);
+	       if ((n = recv(i, buffer, sizeof(buffer), 0)) <= 0) {
+		  if (n == 0) 
+		     cout << "connection closed\n";
+		  else
+		     cout << "ERROR in recv\n";
+		  close(i);
+		  FD_CLR(i, &read_fds);
+	       } else {
+		  cout << "message recieved: " << buffer << endl;
+	       }
 	    }
 	 }
       }
       
    }
-   
+   close(sockfd);
    return 0;
 }
