@@ -77,8 +77,10 @@ int main(int argc, char **argv) {
 	    } else {
 	       if (i == STDIN_FILENO) {
 		  cin >> command;
-		  if (command == "quit")
+		  if (command == "quit") {
+		     close(sockfd);
 		     return 0; // opreste serverul la primirea comenzii quit
+		  }
 		  if (command == "status") {
 		     if (clients.empty())
 			cout << "No clients\n";
@@ -87,7 +89,7 @@ int main(int argc, char **argv) {
 			cout << "Client\tIP:Port\t\tShared files\n";
 			for (it = clients.begin(); it != clients.end(); it++) {
 			   cout << (*it).first << "\t" << (*it).second.getIPPort() <<
-			      "\t" << (*it).second.getShare()/* << endl*/;
+			      "\t" << (*it).second.getShare();
 			}
 		     }
 		  } else {
@@ -111,14 +113,27 @@ int main(int argc, char **argv) {
 			   if (clients.find(buffer + 1) != clients.end()) {
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 100;
-			      send(i, buffer, strlen(buffer), 0);
 			   } else {
 			      clients[buffer + 1] = ClientInfo(inet_ntoa(cli_addr[i].sin_addr), "22");
-			      buffer[0] = 200;
 			      cout << clients[buffer + 1].getIPPort();
-			      send(i, buffer, strlen(buffer), 0);
+			      bzero(buffer, BUFFLEN);
+			      buffer[0] = 20;
 			   }
+			   send(i, buffer, strlen(buffer), 0);
 			} break;
+			case 2:
+			{
+			   map <std::string, ClientInfo> :: iterator it;
+			   string clientsList("Clients: ");
+			   for (it = clients.begin(); it != clients.end(); it++) {
+			      clientsList.append((*it).first).append(", ");
+			   }
+			   bzero(buffer, BUFFLEN);
+			   buffer[0] = 20;
+			   strcpy(buffer + 1, clientsList.c_str());
+			   buffer[strlen(buffer) - 2] = '\0';
+			   send(i, buffer, strlen(buffer), 0);
+			}
 		     }
 		  }
 	       }

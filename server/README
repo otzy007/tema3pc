@@ -7,8 +7,9 @@ Payloads:
 Message Type:
 Comenzi:
 1 - client_name
+2 - listclients
 
 Erori:
 100 - nume client existent
 
-OK: 200
+OK: 20
