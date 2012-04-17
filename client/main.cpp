@@ -7,6 +7,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+#include <vector>
 
 #define BUFFLEN 256
 
@@ -20,7 +24,7 @@ int main(int argc, char **argv) {
    
    int sockfd, fdmax;
    struct sockaddr_in serv_addr;
-   struct hostent *server;
+   struct sockaddr_in file_serv_addr;
    fd_set read_fds;
    fd_set tmp_fds;
    
@@ -71,13 +75,28 @@ int main(int argc, char **argv) {
 	    if (FD_ISSET(i, &tmp_fds)) {
 	       if (i == STDIN_FILENO) {
 		  string command;
-		  cin >> command;
+		  getline(cin, command);
+		  if (command == "quit") {
+		     close(sockfd);
+		     return 0;
+		  }
 		  if (command == "listclients") {
 		     bzero(buffer, BUFFLEN);
 		     buffer[0] = 2;
 		     strcpy(buffer + 1, "listclients");
-		     send(sockfd, buffer, strlen(buffer), 0);
+		  } else if (command.find(" ")) {
+		     
+		     vector <std::string> substr;
+		     boost::split(substr, command, boost::is_any_of(" "));
+		     
+		     if (substr[0] == "infoclient") {
+			bzero(buffer, BUFFLEN);
+			buffer[0] = 3;
+			strcpy(buffer + 1, substr[1].c_str());
+		     }
 		  }
+		  if (send(sockfd, buffer, sizeof(buffer), 0) < 0)
+			   cout << "Cannot send the command\n";
 	       } else if (i == sockfd) {
 		  int n;
 		  bzero(buffer, BUFFLEN);
@@ -90,7 +109,10 @@ int main(int argc, char **argv) {
 		     else
 			cout << "ERROR in recv\n";
 		  } else {
-		     cout << buffer << endl;
+		     if (buffer[0] == 20)
+			cout << buffer << endl;
+		     else
+			cout << "ERROR on server executing the command\n";
 		  }
 	       }
 	    }
