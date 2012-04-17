@@ -99,8 +99,18 @@ int main(int argc, char **argv) {
 		  int n;
 		  bzero(buffer, BUFFLEN);
 		  if ((n = recv(i, buffer, sizeof(buffer), 0)) <= 0) {
-		     if (n == 0) 
-			cout << "connection closed\n";
+		     if (n == 0) {
+			map <std::string, ClientInfo> :: iterator it;
+			
+			for (it = clients.begin(); it != clients.end(); it++) {
+			   if ((*it).second.getSock() == i) {
+			      cout <<(*it).first << " closed the connection\n";
+			      clients.erase(it);
+			      FD_CLR(i, &read_fds);
+			      break;
+			   }
+			}
+		     }
 		     else
 			cout << "ERROR in recv\n";
 		     close(i);
@@ -114,7 +124,7 @@ int main(int argc, char **argv) {
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 100;
 			   } else {
-			      clients[buffer + 1] = ClientInfo(inet_ntoa(cli_addr[i].sin_addr), "22");
+			      clients[buffer + 1] = ClientInfo(i, inet_ntoa(cli_addr[i].sin_addr), "22");
 			      cout << clients[buffer + 1].getIPPort();
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 20;

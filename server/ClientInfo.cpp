@@ -7,9 +7,10 @@ ClientInfo::ClientInfo()
 
 }
 
-ClientInfo::ClientInfo(std::string IP, std::string port)
+ClientInfo::ClientInfo(int sock, std::string IP, std::string port)
 {
    ip = IP;
+   sockfd = sock;
    listenPort = port;
    connectTime = time(NULL);
 }
@@ -62,6 +63,12 @@ bool ClientInfo::unshareFile(std::string file)
    }
    return false;
 }
+
+int ClientInfo::getSock()
+{
+   return sockfd;
+}
+
 
 
 
