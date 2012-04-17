@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 			cout << "Client\tIP:Port\t\tShared files\n";
 			for (it = clients.begin(); it != clients.end(); it++) {
 			   cout << (*it).first << "\t" << (*it).second.getIPPort() <<
-			      "\t" << (*it).second.getShare();
+			      "\t" << (*it).second.getShare() << endl;
 			}
 		     }
 		  } else {
@@ -118,8 +118,8 @@ int main(int argc, char **argv) {
 		  } else {
 		     cout << "message recieved: " << buffer << endl;
 		     switch (buffer[0]) {
-			case 1: 
-			{
+			case 1: {
+			   /* adaugare client */
 			   if (clients.find(buffer + 1) != clients.end()) {
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 100;
@@ -131,8 +131,8 @@ int main(int argc, char **argv) {
 			   }
 			   send(i, buffer, strlen(buffer), 0);
 			} break;
-			case 2:
-			{
+			case 2: {
+			   /* listare clienti */
 			   map <std::string, ClientInfo> :: iterator it;
 			   string clientsList("Clients: ");
 			   for (it = clients.begin(); it != clients.end(); it++) {
@@ -144,8 +144,8 @@ int main(int argc, char **argv) {
 			   buffer[strlen(buffer) - 2] = '\0';
 			   send(i, buffer, strlen(buffer), 0);
 			} break;
-			case 3:
-			{  
+			case 3: {
+			   /* informatii despre client */
 			   string client(buffer + 1);
 			   bzero(buffer, BUFFLEN);
 			   buffer[0] = 20;
@@ -155,8 +155,8 @@ int main(int argc, char **argv) {
 			      strcpy(buffer + 1, "No client with such name");
 			   send(i, buffer, strlen(buffer), 0);
 			} break;
-			case 7:
-			{
+			case 7: {
+			   /* getshare */
 			   string client(buffer + 1);
 			   bzero(buffer, BUFFLEN);
 			   buffer[0] = 20;
@@ -166,6 +166,34 @@ int main(int argc, char **argv) {
 			      strcpy(buffer + 1, "No client with such name");
 			   send(i, buffer, strlen(buffer), 0);
 			} break;
+			case 5: {
+			   /* share fisier */
+			   ClientInfo *cl = get_client_by_sock(clients, i);
+			   
+			   if (cl->getSock() == -100) {
+			      bzero(buffer, BUFFLEN);
+			      buffer[0] = 20;
+			      strcpy(buffer + 1, "Cannot share file, unknown client");
+			   } else {
+			      cl->shareFile(buffer + 1);
+			      bzero(buffer, BUFFLEN);
+			      buffer[0] = 20;
+			      strcpy(buffer + 1, "File shared");
+			   }
+			   cout << cl->getShare() << endl;
+			   send(i, buffer, strlen(buffer), 0);
+			} break;
+			case 6: {
+			   ClientInfo *cl = get_client_by_sock(clients, i);
+			   if (cl->unshareFile(buffer + 1)) {
+			      bzero(buffer, BUFFLEN);
+			      strcpy(buffer + 1, "File removed from share");
+			   } else {
+			      strcpy(buffer + 1, "Cannot unshare file");
+			   }
+			   buffer[0] = 20;
+			   send(i, buffer, strlen(buffer), 0);
+			}
 		     }
 		  }
 	       }

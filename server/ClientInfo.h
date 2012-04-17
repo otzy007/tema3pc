@@ -27,4 +27,6 @@ public:
 
 typedef std::map <std::string, ClientInfo> Clients;
 
+ClientInfo* get_client_by_sock(Clients &clients, int sockfd);
+
 #endif // CLIENTINFO_H

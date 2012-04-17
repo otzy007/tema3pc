@@ -69,6 +69,18 @@ int ClientInfo::getSock()
    return sockfd;
 }
 
+ClientInfo* get_client_by_sock(Clients& clients, int sockfd)
+{
+   /* cauta clientul dupa socket */
+   std::map <std::string, ClientInfo> ::iterator it;
+   
+   for (it = clients.begin(); it != clients.end(); it++)
+      if ((*it).second.getSock() == sockfd)
+	 return &(*it).second;
+      
+//    return &ClientInfo(-100, "not_found", "not_found");
+}
+
 
 
 
