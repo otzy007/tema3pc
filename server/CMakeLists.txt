@@ -1,4 +1,9 @@
 project(server)
 
-add_executable(server main.cpp)
+set(CMAKE_CXX_FLAGS "-g -Wall")
+add_executable(server ClientInfo.cpp main.cpp)
 
+
+add_subdirectory(test)
+
+include(CTest)
