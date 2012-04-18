@@ -8,6 +8,7 @@
 #include <vector>
 #include <string.h>
 #include "ClientInfo.h"
+#include "boost/algorithm/string.hpp"
 
 #define MAX_CLIENTS 5
 #define BUFFLEN 256
@@ -193,6 +194,29 @@ int main(int argc, char **argv) {
 			   }
 			   buffer[0] = 20;
 			   send(i, buffer, strlen(buffer), 0);
+			} break;
+			case 4: {
+			   vector <string> substr;
+			   string command(buffer + 1);
+			   boost::split(substr, command, boost::is_any_of(" "));
+			   bzero(buffer, BUFFLEN);
+			   
+			   if (clients.find(substr[0]) == clients.end()) {
+			      buffer[0] = 20;
+			      strcpy(buffer + 1, "No user with such name");
+			      send(i, buffer, strlen(buffer), 0);
+			   } else {
+			      buffer[0] = 30;
+			      substr[1] = substr[0] + ": " + substr[1];
+			      strcpy(buffer + 1, substr[1].c_str());
+			      
+			      if (send(clients[substr[0]].getSock(), buffer, strlen(buffer), 0) < 0) {
+				 bzero(buffer, BUFFLEN);
+				 buffer[0] = 20;
+				 strcpy(buffer + 1, "Cannot send message");
+				 send(i, buffer, strlen(buffer), 0);
+			      } 
+			   }
 			}
 		     }
 		  }
