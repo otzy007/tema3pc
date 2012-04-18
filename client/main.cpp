@@ -61,8 +61,8 @@ int main(int argc, char **argv) {
       cout << "Name: " << argv[1] << " already used. Please change it!\n";
       return 0;
    } else{ if (buffer[0] == 20) {
-      /* Totul e OK */
-      cout <<"OKKK\n";
+      /* Clientul e conectat */
+      cout <<"Connected\n";
       FD_SET(STDIN_FILENO, &read_fds); // stdin pentru comenzi
       FD_SET(sockfd, &read_fds);
       fdmax = sockfd;
