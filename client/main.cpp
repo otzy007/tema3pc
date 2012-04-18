@@ -163,8 +163,11 @@ int main(int argc, char **argv) {
 		  } else {
 		     if (buffer[0] == 20)
 			cout << buffer + 1<< endl;
-		     else if(buffer[0] == 30) {
+		     else if (buffer[0] == 30) {
 			cout << buffer + 1 << endl;
+		     } else if (buffer[0] == 40) {
+			/* a primit ipul si portul pentru transferul fisierului */
+			cout << "File Transfer\n";
 		     } else
 			cout << "ERROR on server executing the command\n";
 		  }
