@@ -108,10 +108,14 @@ int main(int argc, char **argv) {
 			      buffer[0] = 5;
 			      strcpy(buffer + 1, substr[1].c_str());
 			   }
-			} else if(substr[0] == "unsharefile") {
+			} else if (substr[0] == "unsharefile") {
 			   /* scoate de la share */
 			   buffer[0] = 6;
 			   strcpy(buffer + 1, substr[1].c_str());
+			} else if (substr[0] == "message" && substr.size() == 3) {
+			   /* trimite un mesaj altui client */
+			   buffer[0] = 4;
+			   strcpy(buffer + 1, (substr[1] + " " + substr[2]).c_str());
 			}
 		     }
 		  }
@@ -130,8 +134,10 @@ int main(int argc, char **argv) {
 			cout << "ERROR in recv\n";
 		  } else {
 		     if (buffer[0] == 20)
-			cout << buffer << endl;
-		     else
+			cout << buffer + 1<< endl;
+		     else if(buffer[0] = 30) {
+			cout << buffer + 1 << endl;
+		     } else
 			cout << "ERROR on server executing the command\n";
 		  }
 	       }
