@@ -12,8 +12,10 @@
 #include <fcntl.h>
 
 #include <vector>
+#include <list>
 
 #define BUFFLEN 256
+#define MAX_FILES_TRANSFERS 5
 
 using namespace::std;
 int main(int argc, char **argv) {
@@ -23,30 +25,48 @@ int main(int argc, char **argv) {
       return 0;
    }
    
-   int sockfd, fdmax;
+   int sockfd, fdmax, file_serv_sockfd;
    struct sockaddr_in serv_addr;
    struct sockaddr_in file_serv_addr;
+   struct sockaddr_in tmp_sockaddr;
    fd_set read_fds;
    fd_set tmp_fds;
+   
+   socklen_t tmp = sizeof(tmp_sockaddr);
    
    char buffer[BUFFLEN];
    
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   file_serv_sockfd = socket(AF_INET, SOCK_STREAM, 0);
    
-   if (sockfd < 0)
+   if (sockfd < 0 || file_serv_sockfd < 0)
       cout << "ERROR opening socket\n";
    
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_port = htons(atoi(argv[3]));
    inet_aton(argv[2], & serv_addr.sin_addr);
-  
-   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-      cout << "ERROR connecting\n";
    
+   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+      cout << "ERROR connecting to server\n";
+   
+   file_serv_addr.sin_family = AF_INET;
+   file_serv_addr.sin_addr.s_addr = INADDR_ANY;
+   file_serv_addr.sin_port = htons(0);
+   
+   if (bind(file_serv_sockfd, (struct sockaddr *) &file_serv_addr, sizeof(struct sockaddr)) < 0)
+      cout << "ERROR binding the fileserver\n";
+     
+   if (listen(file_serv_sockfd, MAX_FILES_TRANSFERS) < 0)
+      cout << "ERROR opening listen port\n";
+   
+   if ( getsockname(file_serv_sockfd, (struct sockaddr *) &tmp_sockaddr, &tmp) == -1)
+      cout << "ERROR getting listen port\n";
+   cout << "Listening port: " << ntohs(tmp_sockaddr.sin_port) << endl;
    /* trimite numele de utilizator */
    bzero(buffer, BUFFLEN);
    buffer[0] = 1;
    strcpy(buffer + 1, argv[1]);
+   
    int n = send(sockfd, buffer, strlen(buffer), 0);
    
    if (n < 0)
