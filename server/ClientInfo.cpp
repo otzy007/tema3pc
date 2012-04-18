@@ -81,6 +81,19 @@ ClientInfo* get_client_by_sock(Clients& clients, int sockfd)
 //    return &ClientInfo(-100, "not_found", "not_found");
 }
 
+bool ClientInfo::hasFile(std::string file)
+{
+   /* Verifica daca fisierul este la share */
+   
+   for (unsigned int i = 0; i < share.size(); i++) {
+      if (share[i] == file)
+	 return true;
+   }
+   
+   return false;
+}
+
+
 
 
 

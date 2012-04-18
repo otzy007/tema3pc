@@ -12,6 +12,7 @@
 
 #define MAX_CLIENTS 5
 #define BUFFLEN 256
+#define FILETRANSFERBUF 1024
 
 using namespace::std;
 int main(int argc, char **argv) {
@@ -217,6 +218,27 @@ int main(int argc, char **argv) {
 				 send(i, buffer, strlen(buffer), 0);
 			      } 
 			   }
+			} break;
+			case 8: {
+			   /* 
+			    * Trimite ipul si portul clientului
+			    * Folosit pentru transferul de fisiere
+			    */
+			   
+			   vector <string> substr;
+			   string command(buffer + 1);
+			   boost::split(substr, command, boost::is_any_of(" "));
+			   bzero(buffer, BUFFLEN);
+			   buffer[0] = 20;
+			   if (clients.find(substr[0]) == clients.end())
+			      strcpy(buffer + 1, "No user with such name");
+			   else if (!clients[substr[0]].hasFile(substr[1]))
+			      strcpy(buffer + 1, "User has no shared file with such name");
+			   else {
+			      buffer[0] = 40;
+			      strcpy(buffer + 1, clients[substr[0]].getIPPort().c_str());
+			   }
+			   send(i, buffer, strlen(buffer), 0);
 			}
 		     }
 		  }

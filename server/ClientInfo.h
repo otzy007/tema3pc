@@ -23,6 +23,7 @@ public:
     void shareFile(std::string file);
     bool unshareFile(std::string file);
     int getSock();
+    bool hasFile(std::string file);
 };
 
 typedef std::map <std::string, ClientInfo> Clients;

@@ -13,12 +13,13 @@ Comenzi:
 5 - sharefile
 6 - unsharefile
 7 - getshare
-8 - getfile
+8 - getIPPort (folosit pentru getfile)
+9 - gefile
 
 Raspunsuri:
 Erori:
 100 - nume client existent
 
-OK: 20
-
+20 - OK
 30 - mesaj
+40 - IP:Port
