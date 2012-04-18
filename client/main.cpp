@@ -90,36 +90,64 @@ int main(int argc, char **argv) {
 		     vector <std::string> substr;
 		     boost::split(substr, command, boost::is_any_of(" "));
 		     
-		     if (substr[0] == "infoclient") { // informatii despre client
-			buffer[0] = 3;
-			strcpy(buffer + 1, substr[1].c_str());
+		     if (substr[0] == "infoclient") { 
+			/* informatii despre client */
+			if (substr.size() == 2) {
+			   buffer[0] = 3;
+			   strcpy(buffer + 1, substr[1].c_str());
+			} else 
+			   cout << "Usage: infoclient client_name\n";
 		     } else {
 			if (substr[0] == "getshare") {
 			   /* ia shareul unui client */
-			   buffer[0] = 7;
-			   strcpy(buffer + 1, substr[1].c_str());
+			   if (substr.size() == 2) {
+			      buffer[0] = 7;
+			      strcpy(buffer + 1, substr[1].c_str());
+			   } else
+			      cout << "Usage: getshare client_name\n";
 			} else if (substr[0] == "sharefile") {
 			   /* da la share un fisier */
-			   int fd;
-			   fd = open(substr[1].c_str(), O_RDONLY);
-			   if (fd < 0)
-			      cout << "File " << substr[1] << " does not exists\n";
-			   else {
-			      buffer[0] = 5;
-			      strcpy(buffer + 1, substr[1].c_str());
-			   }
+			   if (substr.size() == 2) {
+			      int fd;
+			      fd = open(substr[1].c_str(), O_RDONLY);
+			      if (fd < 0)
+				 cout << "File " << substr[1] << " does not exists\n";
+			      else {
+				 buffer[0] = 5;
+				 strcpy(buffer + 1, substr[1].c_str());
+			      }
+			   } else
+			      cout << "Usage: sharefile file\n";
 			} else if (substr[0] == "unsharefile") {
 			   /* scoate de la share */
-			   buffer[0] = 6;
-			   strcpy(buffer + 1, substr[1].c_str());
-			} else if (substr[0] == "message" && substr.size() == 3) {
-			   /* trimite un mesaj altui client */
-			   buffer[0] = 4;
-			   strcpy(buffer + 1, (substr[1] + " " + substr[2]).c_str());
-			}
+			   if (substr.size() == 2) {
+			      buffer[0] = 6;
+			      strcpy(buffer + 1, substr[1].c_str());
+			   } else
+			      cout << "Usage: unsharefile file\n";
+			} else if (substr[0] == "message") {
+			   if (substr.size() == 3) {
+			      /* trimite un mesaj altui client */
+			      buffer[0] = 4;
+			      strcpy(buffer + 1, (substr[1] + " " + substr[2]).c_str());
+			   } else 
+			      cout << "Usage: message client_name your_message\n";
+			} else if (substr[0] == "getfile") {
+			      /* transmiterea unui fisier */
+			      if (substr.size() != 3)
+				 cout << "Usage: getfile client file\n";
+			      else {
+				buffer[0] = 8;
+				strcpy(buffer + 1, (substr[1] + " " + substr[2]).c_str());
+			      }
+			} else
+			   cout << "Available commands:\nlistclients\t\t\t" 
+			      << "infoclient client_name\n" << "message client_name message\t"
+			      << "sharefile file\nunsharefile file\t\tgetshare client_name"
+			      << "\ngetfile client_name file\tquit\n";
 		     }
 		  }
-		  if (send(sockfd, buffer, sizeof(buffer), 0) < 0)
+		  if (buffer[0] != 0 && send(sockfd, buffer, sizeof(buffer), 0) < 0)
 			   cout << "Cannot send the command\n";
 	       } else if (i == sockfd) {
 		  int n;
@@ -135,7 +163,7 @@ int main(int argc, char **argv) {
 		  } else {
 		     if (buffer[0] == 20)
 			cout << buffer + 1<< endl;
-		     else if(buffer[0] = 30) {
+		     else if(buffer[0] == 30) {
 			cout << buffer + 1 << endl;
 		     } else
 			cout << "ERROR on server executing the command\n";
