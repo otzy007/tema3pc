@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 			}
 		     }
 		  } else {
-		     cout << "Available commands: status, quit\n";
+		     cout << "Available commands:\nstatus\tquit\n";
 		  }
 	       } else {
 		  int n;
