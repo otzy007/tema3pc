@@ -15,7 +15,7 @@
 #include "../server/util.h"
 
 #define BUFFLEN 256
-#define MAX_FILES_TRANSFERS 5
+#define MAX_FILE_TRANSFERS 5
 
 using namespace::std;
 int main(int argc, char **argv) {
@@ -56,12 +56,13 @@ int main(int argc, char **argv) {
    if (bind(file_serv_sockfd, (struct sockaddr *) &file_serv_addr, sizeof(struct sockaddr)) < 0)
       cout << "ERROR binding the fileserver\n";
      
-   if (listen(file_serv_sockfd, MAX_FILES_TRANSFERS) < 0)
+   if (listen(file_serv_sockfd, MAX_FILE_TRANSFERS) < 0)
       cout << "ERROR opening listen port\n";
    
    if ( getsockname(file_serv_sockfd, (struct sockaddr *) &tmp_sockaddr, &tmp) == -1)
       cout << "ERROR getting listen port\n";
    cout << "Listening port: " << ntohs(tmp_sockaddr.sin_port) << endl;
+  
    /* trimite numele de utilizator si portul de ascultare */
    string name_and_port = string(argv[1]) + " " + 
       boost::lexical_cast <string> (static_cast<int> (ntohs(tmp_sockaddr.sin_port))).c_str();
@@ -70,12 +71,11 @@ int main(int argc, char **argv) {
    buffer[0] = 1;
    strcpy(buffer + 1,name_and_port.c_str());
    
-//    strcpy(buffer, " "); // TODO
-//    strcpy(buffer, boost::lexical_cast<std::string>(static_cast<int> (ntohs(tmp_sockaddr.sin_port))).c_str());
    int n = send(sockfd, buffer, strlen(buffer), 0);
    cout << buffer << endl;
    if (n < 0)
       cout << "ERROR writing to socket\n";
+   
    n = recv(sockfd, buffer, sizeof(buffer), 0);
    
    if (buffer[0] == 100) {
@@ -90,7 +90,10 @@ int main(int argc, char **argv) {
       cout <<"Connected\n";
       FD_SET(STDIN_FILENO, &read_fds); // stdin pentru comenzi
       FD_SET(sockfd, &read_fds);
+      FD_SET(file_serv_sockfd, &read_fds);
       fdmax = sockfd;
+      if ( file_serv_sockfd > fdmax)
+	 fdmax = file_serv_sockfd;
       
       while(1) {
 	 tmp_fds = read_fds;
@@ -112,7 +115,6 @@ int main(int argc, char **argv) {
 		     strcpy(buffer + 1, "listclients");
 		  } else if (command.find(" ")) {
 		     vector <std::string> substr = split(command, " ");
-// 		     boost::split(substr, command, boost::is_any_of(" "));
 		     
 		     if (substr[0] == "infoclient") { 
 			/* informatii despre client */
@@ -186,12 +188,12 @@ int main(int argc, char **argv) {
 			cout << "ERROR in recv\n";
 		  } else {
 		     if (buffer[0] == 20)
-			cout << buffer + 1<< endl;
+			cout << buffer + 1 << endl; // rezultatul executiei unei comenzi
 		     else if (buffer[0] == 30) {
-			cout << buffer + 1 << endl;
+			cout << buffer + 1 << endl; // mesaj primit de la alt client
 		     } else if (buffer[0] == 40) {
 			/* a primit ipul si portul pentru transferul fisierului */
-			cout << "File Transfer\n";
+			cout << "File Transfer\n" << buffer + 1 << endl;
 		     } else
 			cout << "ERROR on server executing the command\n";
 		  }
