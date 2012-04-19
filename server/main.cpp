@@ -128,7 +128,6 @@ int main(int argc, char **argv) {
 			      buffer[0] = 100;
 			   } else {
 			      clients[client_info[0]] = ClientInfo(i, inet_ntoa(cli_addr[i].sin_addr), client_info[1]);
-// 			      cout << clients[buffer + 1].getIPPort();
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 20;
 			   }
