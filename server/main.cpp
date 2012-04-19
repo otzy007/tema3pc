@@ -8,7 +8,7 @@
 #include <vector>
 #include <string.h>
 #include "ClientInfo.h"
-#include "boost/algorithm/string.hpp"
+#include "util.h"
 
 #define MAX_CLIENTS 5
 #define BUFFLEN 256
@@ -122,11 +122,12 @@ int main(int argc, char **argv) {
 		     switch (buffer[0]) {
 			case 1: {
 			   /* adaugare client */
-			   if (clients.find(buffer + 1) != clients.end()) {
+			   vector<string> client_info = split(buffer + 1, " ");
+			   if (clients.find(client_info[0]) != clients.end()) {
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 100;
 			   } else {
-			      clients[buffer + 1] = ClientInfo(i, inet_ntoa(cli_addr[i].sin_addr), "22");
+			      clients[client_info[0]] = ClientInfo(i, inet_ntoa(cli_addr[i].sin_addr), client_info[1]);
 // 			      cout << clients[buffer + 1].getIPPort();
 			      bzero(buffer, BUFFLEN);
 			      buffer[0] = 20;
@@ -197,9 +198,8 @@ int main(int argc, char **argv) {
 			   send(i, buffer, strlen(buffer), 0);
 			} break;
 			case 4: {
-			   vector <string> substr;
-			   string command(buffer + 1);
-			   boost::split(substr, command, boost::is_any_of(" "));
+			   /* trimitere mesaj */
+			   vector <string> substr = split(buffer + 1, " ");
 			   bzero(buffer, BUFFLEN);
 			   
 			   if (clients.find(substr[0]) == clients.end()) {
@@ -225,9 +225,8 @@ int main(int argc, char **argv) {
 			    * Folosit pentru transferul de fisiere
 			    */
 			   
-			   vector <string> substr;
-			   string command(buffer + 1);
-			   boost::split(substr, command, boost::is_any_of(" "));
+			   vector <string> substr = split(buffer + 1, " ");
+			  
 			   bzero(buffer, BUFFLEN);
 			   buffer[0] = 20;
 			   if (clients.find(substr[0]) == clients.end())

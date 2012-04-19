@@ -8,3 +8,4 @@ add_test(StocheazaClientii testClientInfo "goagu" "12.77.0.1" "5544")
 set_tests_properties(StocheazaClientii
    PROPERTIES PASS_REGULAR_EXPRESSION "gogu: port: 4424 time elapsed: 2\ngoagu: port: 5544 time elapsed: 2\nNo shared files")
 
+add_executable(testSplit testSplit.cpp ../util.cpp)
