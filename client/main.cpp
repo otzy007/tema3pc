@@ -12,6 +12,7 @@
 #include <vector>
 #include <list>
 #include <boost/lexical_cast.hpp>
+#include <boost/concept_check.hpp>
 #include "../server/util.h"
 
 #define BUFFLEN 256
@@ -25,10 +26,12 @@ int main(int argc, char **argv) {
       return 0;
    }
    
-   int sockfd, fdmax, file_serv_sockfd;
+   string file;
+   int sockfd, fdmax, file_serv_sockfd, file_transfer_sockfd;
    struct sockaddr_in serv_addr;
    struct sockaddr_in file_serv_addr;
    struct sockaddr_in tmp_sockaddr;
+   
    fd_set read_fds;
    fd_set tmp_fds;
    
@@ -38,10 +41,12 @@ int main(int argc, char **argv) {
    
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
    file_serv_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   file_transfer_sockfd = socket(AF_INET, SOCK_STREAM, 0);
    
    if (sockfd < 0 || file_serv_sockfd < 0)
       cout << "ERROR opening socket\n";
    
+   /* conectare la server */
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_port = htons(atoi(argv[3]));
    inet_aton(argv[2], & serv_addr.sin_addr);
@@ -49,6 +54,7 @@ int main(int argc, char **argv) {
    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
       cout << "ERROR connecting to server\n";
    
+   /* pornirea serverului de fisiere */
    file_serv_addr.sin_family = AF_INET;
    file_serv_addr.sin_addr.s_addr = INADDR_ANY;
    file_serv_addr.sin_port = htons(0);
@@ -107,6 +113,7 @@ int main(int argc, char **argv) {
 		  bzero(buffer, BUFFLEN);
 		  getline(cin, command);
 		  if (command == "quit") {
+		     close(file_serv_sockfd);
 		     close(sockfd);
 		     return 0;
 		  }
@@ -165,6 +172,7 @@ int main(int argc, char **argv) {
 			      else {
 				buffer[0] = 8;
 				strcpy(buffer + 1, (substr[1] + " " + substr[2]).c_str());
+				file = substr[2];
 			      }
 			} else
 			   cout << "Available commands:\nlistclients\t\t\t" 
@@ -194,6 +202,37 @@ int main(int argc, char **argv) {
 		     } else if (buffer[0] == 40) {
 			/* a primit ipul si portul pentru transferul fisierului */
 			cout << "File Transfer\n" << buffer + 1 << endl;
+			vector<string> ip_and_port = split(buffer + 1, ":");
+			struct sockaddr_in file_transfer_sockaddr;
+			
+			/* incearca sa se conecteze la client si sa preia fisierul */
+			file_transfer_sockaddr.sin_family = AF_INET;
+			file_transfer_sockaddr.sin_port = atoi(ip_and_port[1].c_str());
+			inet_aton(ip_and_port[0].c_str(), &serv_addr.sin_addr);
+			
+			if (connect(file_transfer_sockfd, (struct sockaddr *) &file_transfer_sockaddr, sizeof(file_transfer_sockaddr)) < 0)
+			   cout << "ERROR connecting to the client for file transfer\n";
+			else {
+			   bzero(buffer, BUFFLEN);
+			   buffer[0] = 9;
+			   strcpy(buffer + 1, file.c_str());
+			   n = send(file_transfer_sockfd, buffer, strlen(buffer), 0);
+			   if (n < 0) 
+			      cout << "ERROR sending the request for file\n";
+			   bzero(buffer, BUFFLEN);
+			   n = recv(file_serv_sockfd, buffer, sizeof(buffer), 0);
+			   
+			   if (buffer[0] != 51) {
+			     cout << "File transfer refused\n";
+			     close(file_serv_sockfd);
+			   }
+			   else {
+			      FD_SET(file_transfer_sockfd, &read_fds);
+			      if (file_transfer_sockfd > fdmax)
+				 fdmax = file_serv_sockfd;
+			   }   
+			}
+			
 		     } else
 			cout << "ERROR on server executing the command\n";
 		  }
