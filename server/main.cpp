@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 		  if ((n = recv(i, buffer, sizeof(buffer), 0)) <= 0) {
 		     if (n == 0) {
 			map <std::string, ClientInfo> :: iterator it;
-			
+			/* elimina clientul din map daca acesta a inchis conexiunea */
 			for (it = clients.begin(); it != clients.end(); it++) {
 			   if ((*it).second.getSock() == i) {
 			      cout <<(*it).first << " closed the connection\n";
