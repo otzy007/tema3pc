@@ -7,12 +7,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
 #include <fcntl.h>
-
+#include <stdlib.h>
 #include <vector>
 #include <list>
+#include <boost/lexical_cast.hpp>
+#include "../server/util.h"
 
 #define BUFFLEN 256
 #define MAX_FILES_TRANSFERS 5
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_port = htons(atoi(argv[3]));
    inet_aton(argv[2], & serv_addr.sin_addr);
-   
+
    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
       cout << "ERROR connecting to server\n";
    
@@ -62,13 +62,18 @@ int main(int argc, char **argv) {
    if ( getsockname(file_serv_sockfd, (struct sockaddr *) &tmp_sockaddr, &tmp) == -1)
       cout << "ERROR getting listen port\n";
    cout << "Listening port: " << ntohs(tmp_sockaddr.sin_port) << endl;
-   /* trimite numele de utilizator */
+   /* trimite numele de utilizator si portul de ascultare */
+   string name_and_port = string(argv[1]) + " " + 
+      boost::lexical_cast <string> (static_cast<int> (ntohs(tmp_sockaddr.sin_port))).c_str();
+   cout << name_and_port << endl;
    bzero(buffer, BUFFLEN);
    buffer[0] = 1;
-   strcpy(buffer + 1, argv[1]);
+   strcpy(buffer + 1,name_and_port.c_str());
    
+//    strcpy(buffer, " "); // TODO
+//    strcpy(buffer, boost::lexical_cast<std::string>(static_cast<int> (ntohs(tmp_sockaddr.sin_port))).c_str());
    int n = send(sockfd, buffer, strlen(buffer), 0);
-   
+   cout << buffer << endl;
    if (n < 0)
       cout << "ERROR writing to socket\n";
    n = recv(sockfd, buffer, sizeof(buffer), 0);
@@ -106,9 +111,8 @@ int main(int argc, char **argv) {
 		     buffer[0] = 2;
 		     strcpy(buffer + 1, "listclients");
 		  } else if (command.find(" ")) {
-		     
-		     vector <std::string> substr;
-		     boost::split(substr, command, boost::is_any_of(" "));
+		     vector <std::string> substr = split(command, " ");
+// 		     boost::split(substr, command, boost::is_any_of(" "));
 		     
 		     if (substr[0] == "infoclient") { 
 			/* informatii despre client */
