@@ -25,9 +25,11 @@ int main(int argc, char **argv) {
        "server_port" << endl; 
       return 0;
    }
-   
+   		  int newsockfd;  // TODO: temporar
    string file;
-   int sockfd, fdmax, file_serv_sockfd, file_transfer_sockfd;
+   int sockfd, fdmax, old_fdmax;
+   int file_serv_sockfd, file_transfer_sockfd; // pentru transfer fisiere
+   int rfiled, wfiled; // pentru citire, scriere fisier;
    struct sockaddr_in serv_addr;
    struct sockaddr_in file_serv_addr;
    struct sockaddr_in tmp_sockaddr;
@@ -91,7 +93,7 @@ int main(int argc, char **argv) {
        */
       cout << "Name: " << argv[1] << " already used. Please change it!\n";
       return 0;
-   } else{ if (buffer[0] == 20) {
+   } else  if (buffer[0] == 20) {
       /* Clientul e conectat */
       cout <<"Connected\n";
       FD_SET(STDIN_FILENO, &read_fds); // stdin pentru comenzi
@@ -100,6 +102,7 @@ int main(int argc, char **argv) {
       fdmax = sockfd;
       if ( file_serv_sockfd > fdmax)
 	 fdmax = file_serv_sockfd;
+      old_fdmax = fdmax;
       
       while(1) {
 	 tmp_fds = read_fds;
@@ -207,7 +210,8 @@ int main(int argc, char **argv) {
 			
 			/* incearca sa se conecteze la client si sa preia fisierul */
 			file_transfer_sockaddr.sin_family = AF_INET;
-			file_transfer_sockaddr.sin_port = atoi(ip_and_port[1].c_str());
+			file_transfer_sockaddr.sin_port = htons(atoi(ip_and_port[1].c_str()));
+			cout << atoi(ip_and_port[1].c_str()) << ":" << ip_and_port[0].c_str() << endl;
 			inet_aton(ip_and_port[0].c_str(), &serv_addr.sin_addr);
 			
 			if (connect(file_transfer_sockfd, (struct sockaddr *) &file_transfer_sockaddr, sizeof(file_transfer_sockaddr)) < 0)
@@ -220,27 +224,97 @@ int main(int argc, char **argv) {
 			   if (n < 0) 
 			      cout << "ERROR sending the request for file\n";
 			   bzero(buffer, BUFFLEN);
-			   n = recv(file_serv_sockfd, buffer, sizeof(buffer), 0);
+			   n = recv(file_transfer_sockfd, buffer, 1, 0);
 			   
 			   if (buffer[0] != 51) {
 			     cout << "File transfer refused\n";
-			     close(file_serv_sockfd);
+			     close(file_transfer_sockfd);
 			   }
 			   else {
+			      /* deschide fisierul pentru scriere */
+			      cout << "deschide pentru scriere in fisier\n";
+			      cout << buffer << endl;
 			      FD_SET(file_transfer_sockfd, &read_fds);
 			      if (file_transfer_sockfd > fdmax)
-				 fdmax = file_serv_sockfd;
+				 fdmax = file_transfer_sockfd;
+			      wfiled = open(file.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00660);
+			      if (wfiled < 0)
+				 cout << "ERROR opening file for write\n";
+			      
+			      cout << "Poate incepe transferul\n";
 			   }   
 			}
 			
 		     } else
 			cout << "ERROR on server executing the command\n";
 		  }
+	       } else if (i == file_serv_sockfd) {
+		  /* Client nou pentru transferul de fisiere */
+		  cout << "acceptare transfer?\n";
+		  struct sockaddr_in tmp_sockaddr;
+		  unsigned int cli_len = sizeof(tmp_sockaddr);
+		  if ((newsockfd = accept(file_serv_sockfd,(struct sockaddr *) &tmp_sockaddr, &cli_len)) == -1)
+		     cout << "ERROR in accept\n";
+		  else {
+		     FD_SET(newsockfd, &read_fds);
+		     if (newsockfd > fdmax)
+			fdmax = newsockfd;
+		     bzero(buffer, BUFFLEN);
+		     recv(newsockfd, buffer, sizeof(buffer), 0);
+		     if (buffer[0] == 9) {
+			rfiled = open(buffer + 1, O_RDONLY);
+			bzero(buffer, BUFFLEN);
+			if (rfiled <= 0)
+			   buffer[0] = 100;
+			else {
+			   buffer[0] = 51;
+			   FD_SET(rfiled, &read_fds);
+			   if (rfiled > fdmax)
+			      fdmax = rfiled;
+			}
+			cout << "Trimit: "<< buffer[0] << endl;
+			if (send(newsockfd, buffer, strlen(buffer), 0) < 0)
+			   cout << "ERROR sending the response\n";
+		     }
+		  }
+	       } else if (i == file_transfer_sockfd) {
+		  cout << "file_transfer\n";
+		  bzero(buffer, BUFFLEN);
+		  if ((n = recv(file_transfer_sockfd, buffer, sizeof(buffer), 0)) <= 0) {
+		     if (n == 0 /*|| buffer[0] == 0*/) {
+			close(file_transfer_sockfd);
+			close(wfiled);
+			FD_CLR(i, &read_fds);
+			FD_CLR(wfiled, &read_fds);
+			fdmax = old_fdmax;
+			cout << "File transfer completed\n";
+		     } else 
+			cout << "ERROR in recv\n";
+		  } else {
+		     cout << "filed: " << wfiled << endl;
+		     if (write(wfiled, buffer, strlen(buffer)) < 0)
+			cout << "ERROR writing to file\n";
+// 		     close(wfiled);
+// 		     return 0;
+		  }
+	       } else if (i == rfiled) {
+		  cout << "citire din fisier\n";
+		  bzero(buffer, BUFFLEN);
+		  n = read(rfiled, buffer, sizeof(buffer));
+		  send(newsockfd, buffer, strlen(buffer), 0);
+		  if (n <= 0) {
+		     FD_CLR(newsockfd, &read_fds);
+		     FD_CLR(rfiled, &read_fds);
+		     close(newsockfd);
+		     close(rfiled);
+		     fdmax = old_fdmax;
+		  }
 	       }
 	    }
 	 }
       }
-   }}
+   }
+   
    close(sockfd);
    return 0;
 }
