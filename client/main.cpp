@@ -43,7 +43,6 @@ int main(int argc, char **argv) {
    
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
    file_serv_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-   file_transfer_sockfd = socket(AF_INET, SOCK_STREAM, 0);
    
    if (sockfd < 0 || file_serv_sockfd < 0)
       cout << "ERROR opening socket\n";
@@ -213,7 +212,8 @@ int main(int argc, char **argv) {
 			file_transfer_sockaddr.sin_port = htons(atoi(ip_and_port[1].c_str()));
 			cout << atoi(ip_and_port[1].c_str()) << ":" << ip_and_port[0].c_str() << endl;
 			inet_aton(ip_and_port[0].c_str(), &serv_addr.sin_addr);
-			
+
+			file_transfer_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 			if (connect(file_transfer_sockfd, (struct sockaddr *) &file_transfer_sockaddr, sizeof(file_transfer_sockaddr)) < 0)
 			   cout << "ERROR connecting to the client for file transfer\n";
 			else {
