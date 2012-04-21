@@ -28,5 +28,6 @@ public:
 typedef std::map <std::string, ClientInfo> Clients;
 
 ClientInfo* get_client_by_sock(Clients &clients, int sockfd); // cauta clientul in functie de socket
+std::string get_name_by_sock(Clients clients, int sockfd);  // cauta numele clientului dupa socket
 
 #endif // CLIENTINFO_H

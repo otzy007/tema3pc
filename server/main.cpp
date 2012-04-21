@@ -205,11 +205,11 @@ int main(int argc, char **argv) {
 			      strcpy(buffer + 1, "No user with such name");
 			      send(i, buffer, strlen(buffer), 0);
 			   } else {
+			      /* trimite mesaj */
 			      buffer[0] = 30;
-			      substr[1] = substr[0] + ": " + substr[1];
+			      substr[1] = get_name_by_sock(clients, i) + ": " + substr[1];
 			      strcpy(buffer + 1, substr[1].c_str());
 			      
-			      /* trimite mesaj */
 			      if (send(clients[substr[0]].getSock(), buffer, strlen(buffer), 0) < 0) {
 				 bzero(buffer, BUFFLEN);
 				 buffer[0] = 20;

@@ -90,3 +90,15 @@ bool ClientInfo::hasFile(std::string file)
    
    return false;
 }
+
+std::string get_name_by_sock(Clients clients, int sockfd)
+{
+   /* cauta numele dupa socket */
+   std::map <std::string, ClientInfo> ::iterator it;
+   
+   for (it = clients.begin(); it != clients.end(); it++)
+      if ((*it).second.getSock() == sockfd)
+	 return (*it).first;
+      
+   return "anonymous";
+}
