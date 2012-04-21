@@ -90,9 +90,3 @@ bool ClientInfo::hasFile(std::string file)
    
    return false;
 }
-
-
-
-
-
-
