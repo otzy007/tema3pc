@@ -210,7 +210,6 @@ int main(int argc, char **argv) {
 			/* incearca sa se conecteze la client si sa preia fisierul */
 			file_transfer_sockaddr.sin_family = AF_INET;
 			file_transfer_sockaddr.sin_port = htons(atoi(ip_and_port[1].c_str()));
-			cout << atoi(ip_and_port[1].c_str()) << ":" << ip_and_port[0].c_str() << endl;
 			inet_aton(ip_and_port[0].c_str(), &serv_addr.sin_addr);
 
 			file_transfer_sockfd = socket(AF_INET, SOCK_STREAM, 0);
