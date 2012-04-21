@@ -183,6 +183,7 @@ int main(int argc, char **argv) {
 			   send(i, buffer, strlen(buffer), 0);
 			} break;
 			case 6: {
+			   /* sterge de la share */
 			   ClientInfo *cl = get_client_by_sock(clients, i);
 			   if (cl->unshareFile(buffer + 1)) {
 			      bzero(buffer, BUFFLEN);
@@ -199,6 +200,7 @@ int main(int argc, char **argv) {
 			   bzero(buffer, BUFFLEN);
 			   
 			   if (clients.find(substr[0]) == clients.end()) {
+			      /* verifica daca exista clientul cu numele */
 			      buffer[0] = 20;
 			      strcpy(buffer + 1, "No user with such name");
 			      send(i, buffer, strlen(buffer), 0);
@@ -207,6 +209,7 @@ int main(int argc, char **argv) {
 			      substr[1] = substr[0] + ": " + substr[1];
 			      strcpy(buffer + 1, substr[1].c_str());
 			      
+			      /* trimite mesaj */
 			      if (send(clients[substr[0]].getSock(), buffer, strlen(buffer), 0) < 0) {
 				 bzero(buffer, BUFFLEN);
 				 buffer[0] = 20;

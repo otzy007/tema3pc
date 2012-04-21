@@ -1,6 +1,5 @@
 #include "ClientInfo.h"
 #include <sstream>
-#include <iostream>
 
 ClientInfo::ClientInfo()
 {
@@ -19,7 +18,6 @@ std::string ClientInfo::getInfo(std::string name)
 {
    std::string info(name);
    std::stringstream os;
-//    time_t elapsedTime = time(NULL) - connectTime;
    double elapsedTime = difftime(time(NULL), connectTime);
    os << elapsedTime;
    
@@ -41,7 +39,6 @@ std::string ClientInfo::getShare()
    std::string shareList = std::string(share[0]);
    for (unsigned int i = 1; i < share.size(); i++) {
       shareList.append(", ").append(share[i]);
-//       std::cout << share[i] << std::endl;
    }
    return shareList;
 }
@@ -78,7 +75,8 @@ ClientInfo* get_client_by_sock(Clients& clients, int sockfd)
       if ((*it).second.getSock() == sockfd)
 	 return &(*it).second;
       
-//    return &ClientInfo(-100, "not_found", "not_found");
+   ClientInfo a(-100, "not_found", "not_found");
+   return &a;
 }
 
 bool ClientInfo::hasFile(std::string file)

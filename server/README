@@ -1,26 +1,53 @@
-Payloads:
+Tema 3 - Trimiterea de mesaje folosind socketi TCP
 
+In cadrul acestei teme am avut de implementat un server care primeste
+de la clientul sau sau comenzi pe care le executa si returneaza 
+rezultatul.
+
+Clientul si serverul vor trimite serverului un mesaj de forma:
 ----------------------------
 | Message Type |    DATA   |
 ----------------------------
 
-Message Type:
-Comenzi:
-1 - client_name
+unde tipurile mesajelor sunt:
+1 - trimite numele clientului catre server
 2 - listclients
 3 - clientinfo
 4 - message
 5 - sharefile
 6 - unsharefile
 7 - getshare
-8 - getIPPort (folosit pentru getfile)
+8 - getIPPort (folosit pentru getfile) cere ip-ul si portul unui client
 9 - gefile
 
-Raspunsuri:
-Erori:
+Raspunsuri serverului sunt:
 100 - nume client existent
-
 20 - OK
 30 - mesaj
 40 - IP:Port
 51 - File transfer start
+
+La conectare clientul va trimite un mesaj de tipul 1 catre server,
+mesaj ce contine numele clientului si portul pe care acesta asculta
+pentru transferul de fisiere.
+Daca nu mai exista un client cu acelasi nume atunci acesta va fi
+introdus in mapul clients, map ce indexeaza pe baza numelui elemente
+de tipul ClientInfo dupa care trimite mesajul de tip 20.
+Daca mai exista un client cu acelasi nume serverul trimite un mesaj
+de tipul 100, iar clientul se va opri.
+
+Clientul va citi de la tastatura comenzile iar daca acestea exista se
+vor trimite mesaje de tipul comenzii cu parametrii comenzii, altfel se
+va afisa lista cu comenzile posibile. El va primi de la server un mesaj
+de tip 20 care are la date un sir cu rezultatul comenzii, sir care 
+clientul il va afisa.
+Doar in cazul cererii unui fisier serverul va trimite inapoi un mesaj
+de tip 40, mesaj ce contine IPul si portul clientului de la care se
+doreste preluarea fisierului, doar daca clientul si fisierul sunt in
+mapul clients de pe server.
+La primirea acestui mesaj clientul A va incerca sa se conecteze la 
+clientul B pentru preluarea fisierului.
+B va verifica daca fisierul exista si il deschide, dupa care trimite un
+mesaj de tipul 51.
+A va crea fisierul si va astepta de la B continutul acestuia.
+Va incepe apoi transferul efectiv al fisierului.
