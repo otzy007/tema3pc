@@ -11,8 +11,6 @@
 #include "util.h"
 
 #define MAX_CLIENTS 5
-#define BUFFLEN 256
-#define FILETRANSFERBUF 1024
 
 using namespace::std;
 int main(int argc, char **argv) {
@@ -31,7 +29,6 @@ int main(int argc, char **argv) {
    
    struct sockaddr_in serv_addr;
    map <int, struct sockaddr_in> cli_addr;
-   int cli_no; // numarul de clienti
    
    fd_set read_fds;
    
