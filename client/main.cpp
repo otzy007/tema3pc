@@ -293,7 +293,7 @@ int main(int argc, char **argv) {
 			cout << "ERROR in recv\n";
 		  } else {
 		     cout << "filed: " << wfiled << endl;
-		     if (write(wfiled, buffer, strlen(buffer)) < 0)
+		     if (write(wfiled, buffer, n) < 0)
 			cout << "ERROR writing to file\n";
 // 		     close(wfiled);
 // 		     return 0;
@@ -302,8 +302,8 @@ int main(int argc, char **argv) {
 // 		  cout << "citire din fisier\n";
 		  bzero(buffer, BUFFLEN);
 		  n = read(rfiled, buffer, sizeof(buffer));
-		  filesize += strlen(buffer);
-		  if (send(newsockfd, buffer, strlen(buffer), 0) < 0)
+		  filesize += n;
+		  if (send(newsockfd, buffer, n, 0) < 0)
 		     cout << "ERROR sending file's content\n";
 		  if (n == 0) {
 		     FD_CLR(newsockfd, &read_fds);
