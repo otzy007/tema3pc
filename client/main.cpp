@@ -15,7 +15,6 @@
 #include <boost/concept_check.hpp>
 #include "../server/util.h"
 
-#define BUFFLEN 256
 #define MAX_FILE_TRANSFERS 5
 
 using namespace::std;
