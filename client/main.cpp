@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
       return 0;
    }
    		  int newsockfd;  // TODO: temporar
+		  int filesize = 0;
    string file;
    int sockfd, fdmax, old_fdmax;
    int file_serv_sockfd, file_transfer_sockfd; // pentru transfer fisiere
@@ -250,15 +251,13 @@ int main(int argc, char **argv) {
 		  }
 	       } else if (i == file_serv_sockfd) {
 		  /* Client nou pentru transferul de fisiere */
+		  filesize = 0;
 		  cout << "acceptare transfer?\n";
 		  struct sockaddr_in tmp_sockaddr;
 		  unsigned int cli_len = sizeof(tmp_sockaddr);
 		  if ((newsockfd = accept(file_serv_sockfd,(struct sockaddr *) &tmp_sockaddr, &cli_len)) == -1)
 		     cout << "ERROR in accept\n";
 		  else {
-		     FD_SET(newsockfd, &read_fds);
-		     if (newsockfd > fdmax)
-			fdmax = newsockfd;
 		     bzero(buffer, BUFFLEN);
 		     recv(newsockfd, buffer, sizeof(buffer), 0);
 		     if (buffer[0] == 9) {
@@ -268,6 +267,9 @@ int main(int argc, char **argv) {
 			   buffer[0] = 100;
 			else {
 			   buffer[0] = 51;
+			   FD_SET(newsockfd, &read_fds);
+			   if (newsockfd > fdmax)
+			      fdmax = newsockfd;
 			   FD_SET(rfiled, &read_fds);
 			   if (rfiled > fdmax)
 			      fdmax = rfiled;
@@ -298,17 +300,21 @@ int main(int argc, char **argv) {
 // 		     return 0;
 		  }
 	       } else if (i == rfiled) {
-		  cout << "citire din fisier\n";
+// 		  cout << "citire din fisier\n";
 		  bzero(buffer, BUFFLEN);
 		  n = read(rfiled, buffer, sizeof(buffer));
-		  send(newsockfd, buffer, strlen(buffer), 0);
-		  if (n <= 0) {
+		  filesize += strlen(buffer);
+		  if (send(newsockfd, buffer, strlen(buffer), 0) < 0)
+		     cout << "ERROR sending file's content\n";
+		  if (n == 0) {
 		     FD_CLR(newsockfd, &read_fds);
 		     FD_CLR(rfiled, &read_fds);
 		     close(newsockfd);
 		     close(rfiled);
 		     fdmax = old_fdmax;
-		  }
+		     cout << "File size: " << filesize << endl;
+		  } else if(n < 0)
+		     cout << "ERROR reading from file\n";
 	       }
 	    }
 	 }
