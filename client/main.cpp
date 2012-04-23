@@ -20,13 +20,13 @@
 using namespace::std;
 int main(int argc, char **argv) {
    if (argc < 4) {
-      cout << "Usage: " << argv[0] << "client_name server_ip " <<
-       "server_port" << endl; 
+      cout << "Usage: " << argv[0] << "client_name server_ip server_port\n"; 
       return 0;
    }
    		  int newsockfd;  // TODO: temporar
 
    string file;
+   string message; // Mesajul pe care il va trimite catre alt client
    int sockfd, fdmax, old_fdmax;
    int file_serv_sockfd, file_transfer_sockfd; // pentru transfer fisiere
    int rfiled, wfiled; // pentru citire, scriere fisier;
@@ -164,6 +164,7 @@ int main(int argc, char **argv) {
 			   if (substr.size() == 3) {
 			      /* trimite un mesaj altui client */
 			      buffer[0] = 4;
+			      message = substr[2];
 			      strcpy(buffer + 1, (substr[1] + " " + substr[2]).c_str());
 			   } else 
 			      cout << "Usage: message client_name your_message\n";
@@ -200,7 +201,26 @@ int main(int argc, char **argv) {
 		     if (buffer[0] == 20)
 			cout << buffer + 1 << endl; // rezultatul executiei unei comenzi
 		     else if (buffer[0] == 30) {
-			cout << buffer + 1 << endl; // mesaj primit de la alt client
+			// trimitere mesaj la un client
+			vector< string > ip_and_port = split(buffer + 1, ":");
+			struct sockaddr_in message_sockaddr;
+			
+			message_sockaddr.sin_family = AF_INET;
+			message_sockaddr.sin_port = htons(atoi(ip_and_port[1].c_str()));
+			inet_aton(ip_and_port[0].c_str(), &message_sockaddr.sin_addr);
+			int sock = socket(AF_INET, SOCK_STREAM, 0);
+			
+			if (connect(sock, (struct sockaddr *) &message_sockaddr, sizeof(message_sockaddr)) < 0)
+			   cout << "ERROR sending message\n";
+			else {
+			   bzero(buffer, BUFFLEN);
+			   buffer[0] = 30;
+			   string name(argv[1]);
+			   strcpy(buffer + 1, (string(argv[1]) + ": " + message).c_str());
+			   if (send(sock, buffer, strlen(buffer), 0) < 0)
+			      cout << "ERROR sending message\n";
+			   close(sock);
+			}
 		     } else if (buffer[0] == 40) {
 			/* a primit ipul si portul pentru transferul fisierului */
 			cout << "File Transfer\n";
@@ -210,7 +230,7 @@ int main(int argc, char **argv) {
 			/* incearca sa se conecteze la client si sa preia fisierul */
 			file_transfer_sockaddr.sin_family = AF_INET;
 			file_transfer_sockaddr.sin_port = htons(atoi(ip_and_port[1].c_str()));
-			inet_aton(ip_and_port[0].c_str(), &serv_addr.sin_addr);
+			inet_aton(ip_and_port[0].c_str(), &file_transfer_sockaddr.sin_addr);
 
 			file_transfer_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 			if (connect(file_transfer_sockfd, (struct sockaddr *) &file_transfer_sockaddr, sizeof(file_transfer_sockaddr)) < 0)
@@ -272,7 +292,8 @@ int main(int argc, char **argv) {
 			}
 			if (send(newsockfd, buffer, strlen(buffer), 0) < 0)
 			   cout << "ERROR sending the response\n";
-		     }
+		     } else if (buffer[0] == 30)
+			cout << buffer + 1 << endl;
 		  }
 	       } else if (i == file_transfer_sockfd) {
 		  /* Primirea si scrierea continutului fisierului transferat */
