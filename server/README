@@ -51,3 +51,8 @@ B va verifica daca fisierul exista si il deschide, dupa care trimite un
 mesaj de tipul 51.
 A va crea fisierul si va astepta de la B continutul acestuia.
 Va incepe apoi transferul efectiv al fisierului.
+
+Pentru a imparti un sir in subsiruri si a le pune intr-un vector, in
+functia:
+std::vector< std::string > split(std::string stringToSplit, std::string splitBy)
+am folosit boost::split si in client am folosit boost::lexical_cast

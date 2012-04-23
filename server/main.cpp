@@ -15,7 +15,7 @@
 using namespace::std;
 int main(int argc, char **argv) {
    if (argc < 2) {
-      cout << "Usage "<< argv[0] <<" port";
+      cout << "Usage "<< argv[0] <<" port\n";
       return 0;
    }
    
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
       if (select(fdmax + 1, &tmp_fds, NULL, NULL, NULL) == -1)
 	 cout << "ERROR in select\n";
       string command;
-//       cin >> command;
+
       for (int i = 0; i <= fdmax; i++) {
 	 if (FD_ISSET(i, &tmp_fds)) {
 	    if (i == sockfd) {
