@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
       cout << "Usage: " << argv[0] << "client_name server_ip server_port\n"; 
       return 0;
    }
-   		  int newsockfd;  // TODO: temporar
+   int newsockfd;
 
    string file;
    string message; // Mesajul pe care il va trimite catre alt client
@@ -223,7 +223,6 @@ int main(int argc, char **argv) {
 			}
 		     } else if (buffer[0] == 40) {
 			/* a primit ipul si portul pentru transferul fisierului */
-			cout << "File Transfer\n";
 			vector<string> ip_and_port = split(buffer + 1, ":");
 			struct sockaddr_in file_transfer_sockaddr;
 			
@@ -251,16 +250,12 @@ int main(int argc, char **argv) {
 			   }
 			   else {
 			      /* deschide fisierul pentru scriere */
-			      cout << "deschide pentru scriere in fisier\n";
-			      cout << buffer << endl;
 			      FD_SET(file_transfer_sockfd, &read_fds);
 			      if (file_transfer_sockfd > fdmax)
 				 fdmax = file_transfer_sockfd;
 			      wfiled = open(file.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00660);
 			      if (wfiled < 0)
 				 cout << "ERROR opening file for write\n";
-			      
-			      cout << "Poate incepe transferul\n";
 			   }   
 			}
 			
