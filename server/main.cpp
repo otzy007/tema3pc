@@ -115,7 +115,6 @@ int main(int argc, char **argv) {
 		     close(i);
 		     FD_CLR(i, &read_fds);
 		  } else {
-		     cout << "message recieved: " << buffer << endl;
 		     switch (buffer[0]) {
 			case 1: {
 			   /* adaugare client */
@@ -129,6 +128,7 @@ int main(int argc, char **argv) {
 			      buffer[0] = 20;
 			   }
 			   send(i, buffer, strlen(buffer), 0);
+			   cout << "New client: " << client_info[0] << endl;
 			} break;
 			case 2: {
 			   /* listare clienti */
@@ -207,15 +207,8 @@ int main(int argc, char **argv) {
 			   } else {
 			      /* trimite mesaj */
 			      buffer[0] = 30;
-			      substr[1] = get_name_by_sock(clients, i) + ": " + substr[1];
-			      strcpy(buffer + 1, substr[1].c_str());
-			      
-			      if (send(clients[substr[0]].getSock(), buffer, strlen(buffer), 0) < 0) {
-				 bzero(buffer, BUFFLEN);
-				 buffer[0] = 20;
-				 strcpy(buffer + 1, "Cannot send message");
-				 send(i, buffer, strlen(buffer), 0);
-			      } 
+			      strcpy(buffer + 1, clients[substr[0]].getIPPort().c_str());
+			      send(i, buffer, strlen(buffer), 0);
 			   }
 			} break;
 			case 8: {
